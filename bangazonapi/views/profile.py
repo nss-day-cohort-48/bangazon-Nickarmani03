@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from bangazonapi.models import Order, Customer, Product
+from bangazonapi.models import Order, Customer, Product, recommendation
 from bangazonapi.models import OrderProduct, Favorite
 from bangazonapi.models import Recommendation
 from .product import ProductSerializer
@@ -81,8 +81,10 @@ class Profile(ViewSet):
             }
         """
         try:
-            current_user = Customer.objects.get(user=4)
+            # current_user = Customer.objects.get(user=4)
+            current_user = Customer.objects.get(user=request.auth.user)
             current_user.recommends = Recommendation.objects.filter(recommender=current_user)
+            current_user.recommendations = Recommendation.objects.filter(customer=current_user)
 
             serializer = ProfileSerializer(
                 current_user, many=False, context={'request': request})
@@ -114,8 +116,8 @@ class Profile(ViewSet):
             try:
                 open_order = Order.objects.get(
                     customer=current_user, payment_type=None)
-                lineitems = OrderProduct.objects.filter(order=open_order)
-                lineitems.delete()
+                line_items = OrderProduct.objects.filter(order=open_order)
+                line_items.delete()
                 open_order.delete()
             except Order.DoesNotExist as ex:
                 return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
@@ -177,15 +179,14 @@ class Profile(ViewSet):
             try:
                 open_order = Order.objects.get(
                     customer=current_user, payment_type=None)
-                lineitems = OrderProduct.objects.filter(order=open_order)
-                lineitems = LineItemSerializer(
-                    lineitems many=True, context={'request': request})
+                line_items = OrderProduct.objects.filter(order=open_order)
+                line_items = LineItemSerializer(
+                    line_items, many=True, context={'request': request})
 
                 cart = {}
-                cart["order"] = OrderSerializer(open_order, many=False, context={
-                                                'request': request}).data
-                cart["order"]["lineitems"] = lineitems.data
-                cart["order"]["size"] = len(lineitems.data)
+                cart["order"] = OrderSerializer(open_order, many=False, context={'request': request}).data
+                cart["order"]["line_items"] = line_items.data
+                cart["order"]["size"] = len(line_items.data)
 
             except Order.DoesNotExist as ex:
                 return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
@@ -361,6 +362,16 @@ class RecommenderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recommendation
         fields = ('product', 'customer',)
+        fields = ('id', 'product', 'customer',)
+
+class RecommendationsSerializer(serializers.ModelSerializer):
+    """JSON serializer for recommendations"""
+    recommender = CustomerSerializer()
+    product = ProfileProductSerializer()
+
+    class Meta:
+        model = Recommendation
+        fields = ('product', "recommender",)
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -371,11 +382,11 @@ class ProfileSerializer(serializers.ModelSerializer):
     """
     user = UserSerializer(many=False)
     recommends = RecommenderSerializer(many=True)
+    recommendations = RecommendationsSerializer(many=True)
 
     class Meta:
         model = Customer
-        fields = ('id', 'url', 'user', 'phone_number',
-                  'address', 'payment_types', 'recommends',)
+        fields = ('id', 'url', 'user', 'phone_number', 'address', 'payment_types', 'recommends', 'recommendations',)
         depth = 1
 
 

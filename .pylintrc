@@ -2,3 +2,4 @@
 good-names=i,j,ex,pk
 
 pylint: disable=no-member
+pylint:disable=broad-except

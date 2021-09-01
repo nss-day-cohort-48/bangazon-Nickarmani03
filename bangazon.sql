@@ -1,0 +1,1 @@
+-- DROP TABLE bangazonapi_recommendation;

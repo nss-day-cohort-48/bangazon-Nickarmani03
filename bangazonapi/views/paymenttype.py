@@ -46,7 +46,7 @@ class Payments(ViewSet):
         except Exception as ex:
             return HttpResponseServerError(ex)
 
-    def destroy(self, request, pk=None):
+    def destroy(self, _, pk=None):
         """Handle DELETE requests for a single payment type
 
         Returns:

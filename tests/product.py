@@ -112,23 +112,6 @@ class ProductTests(APITestCase):
             location = "Pittsburgh")
         url = "/products/1"
 
-        # data = {
-
-        #     "product_type_id": 1,
-        #     "name": "Kite",
-        #     "price": 24.99,
-        #     "quantity": 40,
-        #     "description": "It flies very high",
-        #     "category_id": 1,
-        #     "created_date": datetime.date.today(),
-        #     "location": "Pittsburgh"
-        # }
-
-        # self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
-        # response = self.client.post(url, data, format='json')
-        # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        # url = '/products'
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 

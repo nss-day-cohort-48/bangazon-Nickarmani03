@@ -153,9 +153,13 @@ class Products(ViewSet):
         try:
             product = Product.objects.get(pk=pk)
             serializer = ProductSerializer(product, context={'request': request})
-            return Response(serializer.data)
+            return Response(serializer.data)        
+
+        except Product.DoesNotExist as ex:
+            return Response(ex.args[0], status=status.HTTP_404_NOT_FOUND)
+
         except Exception as ex:
-            return HttpResponseServerError(ex)
+            return Response(ex.args[0], status=status.HTTP_200_OK)
 
     def update(self, request, pk=None):
         """
@@ -188,7 +192,7 @@ class Products(ViewSet):
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, pk=None):
+    def destroy(self, _, pk=None):
         """
         @api {DELETE} /products/:id DELETE product
         @apiName DeleteProduct

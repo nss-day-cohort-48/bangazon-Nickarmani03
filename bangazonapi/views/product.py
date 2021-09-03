@@ -159,7 +159,7 @@ class Products(ViewSet):
             return Response(ex.args[0], status=status.HTTP_404_NOT_FOUND)
 
         except Exception as ex:
-            return Response(ex.args[0], status=status.HTTP_200_OK)
+            return  HttpResponseServerError(ex)
 
     def update(self, request, pk=None):
         """

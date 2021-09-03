@@ -93,5 +93,4 @@ class Payments(ViewSet):
         serializer = PaymentSerializer(
             payment_types, many=True, context={'request': request})
         return Response(serializer.data)
-
-
+        

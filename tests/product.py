@@ -1,3 +1,4 @@
+from bangazonapi.views.product import Product
 import json
 import datetime
 from rest_framework import status
@@ -96,5 +97,27 @@ class ProductTests(APITestCase):
         self.assertEqual(len(json_response), 3)
 
     # TODO: Delete product
+    def test_delete_product(self):
+        """
+        Ensure we can delete an existing product.
+        """
+        Product.objects.create(
+            customer_id = 1,
+            name = "Kite",
+            price = 24.99,
+            quantity = 40,
+            description = "It flies very high",
+            category_id = 1,
+            created_date = datetime.date.today(),
+            location = "Pittsburgh")
+        url = "/products/1"
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # GET product AGAIN TO VERIFY 404 response
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND) 
+
 
     # TODO: Product can be rated. Assert average rating exists.

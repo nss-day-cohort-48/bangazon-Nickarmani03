@@ -49,6 +49,7 @@ class ProductCategories(ViewSet):
             category = ProductCategory.objects.get(pk=pk)
             serializer = ProductCategorySerializer(category, context={'request': request})
             return Response(serializer.data)
+            
         except Exception as ex:
             return HttpResponseServerError(ex)
 
